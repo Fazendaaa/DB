@@ -13,11 +13,13 @@ import tkinter as tk
 from tkinter import font as tkfont
 from BD.SGBD import Database
 
+# ------------------------------------ PDF ----------------------------------- #
+
 class PDF(FPDF):
     def header(self):
         self.set_font('Arial', 'B', 15)
         self.cell(80)
-        self.cell(30, 10, 'Base de Dados', 1, 0, 'C')
+        self.cell(30, 10, 'Olimpíadas 2020 - Tóquio', 1, 0, 'C')
         self.ln(20)
 
     def footer(self):
@@ -55,21 +57,59 @@ class baseDeDados(Database):
 
 # --------------------------------- INTERFACE -------------------------------- #
 
+def get_linha_selecionada(event):
+    """Função para retornar a opção selecionada"""
+    global tupla_selecionada, listBox
+    tupla_selecionada = listBox.get(listBox.curselection()[0])
+
 class Menu(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         
         label = tk.Label(self, text="Selecione a opção desejada", font=controller.title_font)
-        label.pack(side="top", fill="x", pady=10)
 
-        button1 = tk.Button(self, text="Gerar relatório", command=lambda: controller.show_frame("Relatorios"))
-        button2 = tk.Button(self, text="Rodar scripts", command=lambda: controller.show_frame("Scripts"))
-        button3 = tk.Button(self, text="Fechar", command=lambda: controller.encerrar())
+        button1 = tk.Button(self, text="Gerenciar relação", command=lambda: controller.show_frame("Relacao"))
+        button2 = tk.Button(self, text="Gerar relatório", command=lambda: controller.show_frame("Relatorios"))
+        button3 = tk.Button(self, text="Rodar scripts", command=lambda: controller.show_frame("Scripts"))
+        button4 = tk.Button(self, text="Fechar", command=lambda: controller.encerrar())
         
-        button1.pack()
-        button2.pack()
-        button3.pack()
+        label.pack()
+        
+        button1.pack(fill="x", padx=5, pady=5)
+        button2.pack(fill="x", padx=5, pady=5)
+        button3.pack(fill="x", padx=5, pady=5)
+        button4.pack(fill="x", padx=5, pady=5)
+
+class Relacao(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        global listBox
+
+        label = tk.Label(self, text="Gerenciar relação", font=controller.title_font)
+        text_intro = tk.Label(self, text="Selecione os dados seguido da opção que deseja realizar.")
+
+        resultadoLabel = tk.Label(self, text="Resultado:")
+
+        listBox = tk.Listbox(self, height=6, width=50)
+        scrollBar = tk.Scrollbar(listBox)
+
+        scrollBar.configure(command=listBox.yview)
+        listBox.configure(yscrollcommand=scrollBar.set)
+        listBox.bind('<<ListboxSelect>>', get_linha_selecionada)
+
+        atletas = tk.Button(self, text="Rodar", command=lambda: controller.show_frame('Menu'))
+        menu = tk.Button(self, text="Voltar", command=lambda: controller.show_frame('Menu'))
+        
+        label.pack(padx=5, pady=5)
+        text_intro.pack(padx=5, pady=5)
+        resultadoLabel.pack(padx=5, pady=5)
+        listBox.pack(fill="x", padx=5, pady=5)
+        scrollBar.pack(side='right')
+
+        atletas.pack(fill="x", padx=5, pady=5)
+        menu.pack(fill="x", padx=5, pady=5)
 
 class Relatorios(tk.Frame):
     def __init__(self, parent, controller):
@@ -80,54 +120,70 @@ class Relatorios(tk.Frame):
         text_intro = tk.Label(self, text="Selecione o tipo de relatório que deseja.")
         text_description = tk.Label(self, text="Os relatórios gerados serão salvos em pdf no diretório atual.")
 
-        label.pack(side="top", fill="x", pady=10)
-        text_intro.pack(side="top", fill="x")
-        text_description.pack(side="top", fill="x")
-
         atletas = tk.Button(self, text="Listagem por atletas", command=lambda: controller.show_frame('ListarAtletas'))
         medico = tk.Button(self, text="Listagem por médicos", command=lambda: controller.show_frame('ListarMedicos'))
         treinador = tk.Button(self, text="Listagem por treinador", command=lambda: controller.show_frame('ListarTreinador'))
         menu = tk.Button(self, text="Voltar", command=lambda: controller.show_frame('Menu'))
 
-        atletas.pack()
-        medico.pack()
-        treinador.pack()
-        menu.pack()
+        label.pack(padx=5, pady=5)
+        text_intro.pack(padx=5, pady=5)
+        text_description.pack(padx=5, pady=5)
+
+        atletas.pack(fill="x", padx=5, pady=5)
+        medico.pack(fill="x", padx=5, pady=5)
+        treinador.pack(fill="x", padx=5, pady=5)
+        menu.pack(fill="x", padx=5, pady=5)
 
 class ListarAtletas(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        global listBox
 
         label = tk.Label(self, text="Listagem por atletas", font=controller.title_font)
         
         modalidadeLabel = tk.Label(self, text="Digite o nome da modalidade:")
         modalidadeEntry = tk.Entry(self, textvariable=modalidadeStr, width=50)
         
-        medicoLabel = tk.Label(self, text="Digite o nome do medico:")
+        medicoLabel = tk.Label(self, text="Digite o nome do médico:")
         medicoEntry = tk.Entry(self, textvariable=medicoStr, width=50)
         
         treinadorLabel = tk.Label(self, text="Digite o nome do treinador:")
         treinadorEntry = tk.Entry(self, textvariable=treinadorStr, width=50)
-        
-        label.pack(side="top", fill="x", pady=10)
-        modalidadeLabel.pack(side="top", fill="x")
-        modalidadeEntry.pack(side="top", fill="x")
-        medicoLabel.pack(side="top", fill="x")
-        medicoEntry.pack(side="top", fill="x")
-        treinadorLabel.pack(side="top", fill="x")
-        treinadorEntry.pack(side="top", fill="x")
-        
+
+        resultadoLabel = tk.Label(self, text="Resultado:")
+
+        listBox = tk.Listbox(self, height=6, width=50)
+        scrollBar = tk.Scrollbar(listBox)
+
+        scrollBar.configure(command=listBox.yview)
+        listBox.configure(yscrollcommand=scrollBar.set)
+        listBox.bind('<<ListboxSelect>>', get_linha_selecionada)
+
         rodar = tk.Button(self, text="Rodar", command=controller.base.gerar_relatorio_atleta)
         voltar = tk.Button(self, text="Voltar", command=lambda: controller.show_frame('Relatorios'))
+        pdf = tk.Button(self, text="Gerar PDF", command=controller.base.gerar_relatorio_atleta)
         
-        rodar.pack()
-        voltar.pack()
+        label.pack(padx=5, pady=5)
+        modalidadeLabel.pack(padx=5, pady=5)
+        modalidadeEntry.pack(fill="x", padx=5, pady=5)
+        medicoLabel.pack(padx=5, pady=5)
+        medicoEntry.pack(fill="x", padx=5, pady=5)
+        treinadorLabel.pack(padx=5, pady=5)
+        treinadorEntry.pack(fill="x", padx=5, pady=5)
+        resultadoLabel.pack(padx=5, pady=5)
+        listBox.pack(fill="x", padx=5, pady=5)
+        scrollBar.pack(side='right')
+
+        rodar.pack(fill="x", padx=5, pady=5)
+        pdf.pack(fill="x", padx=5, pady=5)
+        voltar.pack(fill="x", padx=5, pady=5)
 
 class ListarMedicos(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        global listBox
 
         label = tk.Label(self, text="Listagem por médicos", font=controller.title_font)
         
@@ -137,34 +193,64 @@ class ListarMedicos(tk.Frame):
         nacaoLabel = tk.Label(self, text="Digite o nome da nação:")
         nacaoEntry = tk.Entry(self, textvariable=nacaoStr, width=50)
         
-        label.pack(side="top", fill="x", pady=10)
-        atletaLabel.pack(side="top", fill="x")
-        atletaEntry.pack(side="top", fill="x")
-        nacaoLabel.pack(side="top", fill="x")
-        nacaoEntry.pack(side="top", fill="x")
-        
+        resultadoLabel = tk.Label(self, text="Resultado:")
+
+        listBox = tk.Listbox(self, height=6, width=50)
+        scrollBar = tk.Scrollbar(listBox)
+
+        scrollBar.configure(command=listBox.yview)
+        listBox.configure(yscrollcommand=scrollBar.set)
+        listBox.bind('<<ListboxSelect>>', get_linha_selecionada)
+
         rodar = tk.Button(self, text="Rodar", command=controller.base.gerar_relatorio_medico)
         voltar = tk.Button(self, text="Voltar", command=lambda: controller.show_frame('Relatorios'))
+        pdf = tk.Button(self, text="Gerar PDF", command=controller.base.gerar_relatorio_medico)
         
-        rodar.pack()
-        voltar.pack()
+        label.pack(padx=5, pady=5)
+        atletaLabel.pack(padx=5, pady=5)
+        atletaEntry.pack(fill="x", padx=5, pady=5)
+        nacaoLabel.pack(padx=5, pady=5)
+        nacaoEntry.pack(fill="x", padx=5, pady=5)
+        resultadoLabel.pack(padx=5, pady=5)
+        listBox.pack(fill="x", padx=5, pady=5)
+        scrollBar.pack(side='right')
+        
+        rodar.pack(fill="x", padx=5, pady=5)
+        pdf.pack(fill="x", padx=5, pady=5)
+        voltar.pack(fill="x", padx=5, pady=5)
 
 class ListarTreinador(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        global listBox
 
-        label = tk.Label(self, text="Listagem por atletas", font=controller.title_font)
+        label = tk.Label(self, text="Listagem por treinador", font=controller.title_font)
+
         atletaLabel = tk.Label(self, text="Aperte o botão rodar para realizar a tarefa.")
+       
+        resultadoLabel = tk.Label(self, text="Resultado:")
 
-        label.pack(side="top", fill="x", pady=10)
-        atletaLabel.pack(side="top", fill="x")
+        listBox = tk.Listbox(self, height=6, width=50)
+        scrollBar = tk.Scrollbar(listBox)
+
+        scrollBar.configure(command=listBox.yview)
+        listBox.configure(yscrollcommand=scrollBar.set)
+        listBox.bind('<<ListboxSelect>>', get_linha_selecionada)
         
         rodar = tk.Button(self, text="Rodar", command=controller.base.gerar_relatorio_treinador)
         voltar = tk.Button(self, text="Voltar", command=lambda: controller.show_frame('Relatorios'))
+        pdf = tk.Button(self, text="Gerar PDF", command=controller.base.gerar_relatorio_treinador)
+
+        label.pack(padx=5, pady=5)
+        atletaLabel.pack(padx=5, pady=5)
+        resultadoLabel.pack(padx=5, pady=5)
+        listBox.pack(fill="x", padx=5, pady=5)
+        scrollBar.pack(side='right')
         
-        rodar.pack()
-        voltar.pack()
+        rodar.pack(fill="x", padx=5, pady=5)
+        pdf.pack(fill="x", padx=5, pady=5)
+        voltar.pack(fill="x", padx=5, pady=5)
 
 class Scripts(tk.Frame):
     def __init__(self, parent, controller):
@@ -174,17 +260,19 @@ class Scripts(tk.Frame):
         label = tk.Label(self, text="Scripts", font=controller.title_font)
         text = tk.Label(self, text="Os scripts se encontram na pasta 'scripts' no mesmo diretório.")
         
-        label.pack(side="top", fill="x", pady=10)
-        text.pack(side="top", fill="x")
-        
         menu = tk.Button(self, text="Voltar", command=lambda: controller.show_frame('Menu'))
-        menu.pack()
+        
+        label.pack(padx=5, pady=5)
+        text.pack(padx=5, pady=5)
+        
+        menu.pack(fill="x", padx=5, pady=5)
 
 # --------------------------------- SISTEMA ---------------------------------- #
 
 class olimpiadas(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+        self.wm_title("Olimpíada 2020 - Tóquio")
         self.base = baseDeDados()
 
         global modalidadeStr, medicoStr, treinadorStr, atetlaStr, nacaoStr
@@ -195,15 +283,15 @@ class olimpiadas(tk.Tk):
         atetlaStr = tk.StringVar(self)
         nacaoStr = tk.StringVar(self)
 
-        self.title_font = tkfont.Font(family="Opções", size=18, weight="bold", slant="italic")
+        self.title_font = tkfont.Font(family="Arial", size=18, weight="bold", slant="italic")
 
-        container = tk.Frame(self)
+        container = tk.LabelFrame(self, text="Ações", padx=0, pady=0)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (Menu, Relatorios, Scripts, ListarAtletas, ListarMedicos, ListarTreinador):
+        for F in (Menu, Relacao, Relatorios, Scripts, ListarAtletas, ListarMedicos, ListarTreinador):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -218,8 +306,8 @@ class olimpiadas(tk.Tk):
         frame.tkraise()
 
     def encerrar(self):
-        self.destroy()
         self.base.fechar_conexao()
+        self.destroy()
 
 # ---------------------------------- MAIN ------------------------------------ #
 
