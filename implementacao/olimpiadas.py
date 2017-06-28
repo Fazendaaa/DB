@@ -19,7 +19,7 @@ class PDF(FPDF):
     def header(self):
         self.set_font('Arial', 'B', 15)
         self.cell(80)
-        self.cell(30, 10, 'Olimpíadas 2020 - Tóquio', 1, 0, 'C')
+        self.cell(80, 10, 'Olimpíadas 2020 - Tóquio', 1, 0, 'C')
         self.ln(20)
 
     def footer(self):
@@ -174,11 +174,11 @@ class ListarAtletas(tk.Frame):
 
         resultadoLabel = tk.Label(self, text="Resultado:")
 
-        listBox = tk.Listbox(self, height=6, width=50)
-        scrollBar = tk.Scrollbar(listBox)
+        self.listBox = tk.Listbox(self, height=6, width=50)
+        scrollBar = tk.Scrollbar(self.listBox)
 
-        scrollBar.configure(command=listBox.yview)
-        listBox.configure(yscrollcommand=scrollBar.set)
+        scrollBar.configure(command=self.listBox.yview)
+        self.listBox.configure(yscrollcommand=scrollBar.set)
 
         pesquisar = tk.Button(self, text="Pesquisar", command=self.pesquisar_atletas)
         voltar = tk.Button(self, text="Voltar", command=lambda: controller.show_frame('Relatorios'))
@@ -195,23 +195,33 @@ class ListarAtletas(tk.Frame):
         pesquisar.pack(fill="x", padx=5, pady=5)
         
         resultadoLabel.pack(padx=5, pady=5)
-        listBox.pack(fill='both', expand=True, padx=5, pady=5)
+        self.listBox.pack(fill='both', expand=True, padx=5, pady=5)
         scrollBar.pack(fill='both', side='right')
 
         pdf.pack(fill="x", padx=5, pady=5)
         voltar.pack(fill="x", padx=5, pady=5)
     
     def pesquisar_atletas(self):
-        print('Não')
+        self.listBox.delete(0, tk.END)
+        for row in self.controller.base.visualizar():
+            self.listBox.insert(tk.END, row)
 
-    def relatorio(self):
-        self.controller.pdf.alias_nb_pages()
-        self.controller.pdf.add_page()
-        self.controller.pdf.set_font('Times', '', 12)
-        self.controller.pdf.cell(0, 10, 'Modalidade: ' + self.modalidadeStr.get(), 0, 1)
-        self.controller.pdf.cell(0, 10, 'Médico: ' + self.medicoStr.get(), 0, 1)
-        self.controller.pdf.cell(0, 10, 'Treinador: ' + self.treinadorStr.get(), 0, 1)
-        self.controller.pdf.output('atleta.pdf', 'F')
+    def relatorio(self):        
+        queries = self.listBox.get(0, last=tk.END);
+
+        if len(queries) > 0 and self.controller.pdfGerado != queries[0] and self.controller.pdfErro != queries[0]:
+            for row in queries:
+                self.controller.pdf.cell(0, 10, 'Modalidade: ' + str(row[0]), 0, 1)
+                self.controller.pdf.cell(0, 10, 'Médico: ' + str(row[1]), 0, 1)
+                self.controller.pdf.cell(0, 10, 'Treinador: ' + str(row[2]), 0, 1)
+            
+            self.controller.pdf.output('atleta.pdf', 'F')
+            self.listBox.delete(0, tk.END)
+            self.listBox.insert(tk.END, self.controller.pdfGerado)
+        
+        else:
+            self.listBox.delete(0, tk.END)
+            self.listBox.insert(tk.END, self.controller.pdfErro)
 
 class ListarMedicos(tk.Frame):
     def __init__(self, parent, controller):
@@ -231,11 +241,11 @@ class ListarMedicos(tk.Frame):
         
         resultadoLabel = tk.Label(self, text="Resultado:")
 
-        listBox = tk.Listbox(self, height=6, width=50)
-        scrollBar = tk.Scrollbar(listBox)
+        self.listBox = tk.Listbox(self, height=6, width=50)
+        scrollBar = tk.Scrollbar(self.listBox)
 
-        scrollBar.configure(command=listBox.yview)
-        listBox.configure(yscrollcommand=scrollBar.set)
+        scrollBar.configure(command=self.listBox.yview)
+        self.listBox.configure(yscrollcommand=scrollBar.set)
 
         pesquisar = tk.Button(self, text="Pesquisar", command=self.pesquisar_medicos)
         voltar = tk.Button(self, text="Voltar", command=lambda: controller.show_frame('Relatorios'))
@@ -250,20 +260,33 @@ class ListarMedicos(tk.Frame):
         pesquisar.pack(fill="x", padx=5, pady=5)
         
         resultadoLabel.pack(padx=5, pady=5)
-        listBox.pack(fill="both", expand=True, padx=5, pady=5)
+        self.listBox.pack(fill="both", expand=True, padx=5, pady=5)
         scrollBar.pack(fill='both', side='right')
         
         pdf.pack(fill="x", padx=5, pady=5)
         voltar.pack(fill="x", padx=5, pady=5)
 
     def pesquisar_medicos(self):
-        print('Não')
+        self.listBox.delete(0, tk.END)
+        for row in self.controller.base.visualizar():
+            self.listBox.insert(tk.END, row)
 
-    def relatorio(self):
-        self.controller.pdf.alias_nb_pages()
-        self.controller.pdf.add_page()
-        self.controller.pdf.set_font('Times', '', 12)
-        self.controller.pdf.output('medico.pdf', 'F')
+    def relatorio(self):        
+        queries = self.listBox.get(0, last=tk.END);
+
+        if len(queries) > 0 and self.controller.pdfGerado != queries[0] and self.controller.pdfErro != queries[0]:            
+            for row in queries:
+                self.controller.pdf.cell(0, 10, 'Modalidade: ' + str(row[0]), 0, 1)
+                self.controller.pdf.cell(0, 10, 'Médico: ' + str(row[1]), 0, 1)
+                self.controller.pdf.cell(0, 10, 'Treinador: ' + str(row[2]), 0, 1)
+            
+            self.controller.pdf.output('medico.pdf', 'F')
+            self.listBox.delete(0, tk.END)
+            self.listBox.insert(tk.END, self.controller.pdfGerado)
+        
+        else:
+            self.listBox.delete(0, tk.END)
+            self.listBox.insert(tk.END, self.controller.pdfErro)
 
 class ListarTreinador(tk.Frame):
     def __init__(self, parent, controller):
@@ -276,11 +299,11 @@ class ListarTreinador(tk.Frame):
        
         resultadoLabel = tk.Label(self, text="Resultado:")
 
-        listBox = tk.Listbox(self, height=6, width=50)
-        scrollBar = tk.Scrollbar(listBox)
+        self.listBox = tk.Listbox(self, height=6, width=50)
+        scrollBar = tk.Scrollbar(self.listBox)
 
-        scrollBar.configure(command=listBox.yview)
-        listBox.configure(yscrollcommand=scrollBar.set)
+        scrollBar.configure(command=self.listBox.yview)
+        self.listBox.configure(yscrollcommand=scrollBar.set)
         
         pesquisar = tk.Button(self, text="Pesquisar", command=self.pesquisar_treinador)
         voltar = tk.Button(self, text="Voltar", command=lambda: controller.show_frame('Relatorios'))
@@ -292,20 +315,33 @@ class ListarTreinador(tk.Frame):
         pesquisar.pack(fill="x", padx=5, pady=5)
         
         resultadoLabel.pack(padx=5, pady=5)
-        listBox.pack(fill="both", expand=True, padx=5, pady=5)
+        self.listBox.pack(fill="both", expand=True, padx=5, pady=5)
         scrollBar.pack(fill='both', side='right')
         
         pdf.pack(fill="x", padx=5, pady=5)
         voltar.pack(fill="x", padx=5, pady=5)
     
     def pesquisar_treinador(self):
-        print('Não')
+        self.listBox.delete(0, tk.END)
+        for row in self.controller.base.visualizar():
+            self.listBox.insert(tk.END, row)
 
-    def relatorio(self):
-        self.controller.pdf.alias_nb_pages()
-        self.controller.pdf.add_page()
-        self.controller.pdf.set_font('Times', '', 12)
-        self.controller.pdf.output('treinador.pdf', 'F')
+    def relatorio(self):        
+        queries = self.listBox.get(0, last=tk.END);
+
+        if len(queries) > 0 and self.controller.pdfGerado != queries[0] and self.controller.pdfErro != queries[0]:            
+            for row in queries:
+                self.controller.pdf.cell(0, 10, 'Modalidade: ' + str(row[0]), 0, 1)
+                self.controller.pdf.cell(0, 10, 'Médico: ' + str(row[1]), 0, 1)
+                self.controller.pdf.cell(0, 10, 'Treinador: ' + str(row[2]), 0, 1)
+            
+            self.controller.pdf.output('treinador.pdf', 'F')
+            self.listBox.delete(0, tk.END)
+            self.listBox.insert(tk.END, self.controller.pdfGerado)
+        
+        else:
+            self.listBox.delete(0, tk.END)
+            self.listBox.insert(tk.END, self.controller.pdfErro)
 
 class Scripts(tk.Frame):
     def __init__(self, parent, controller):
@@ -327,6 +363,10 @@ class Scripts(tk.Frame):
 class olimpiadas(tk.Tk):
     def __init__(self, *args, **kwargs):
         self.pdf = PDF()
+        self.pdf.set_font('Times', '', 12)
+        self.pdf.add_page()
+        self.pdfGerado = 'PDF gerado e salvo.'
+        self.pdfErro = 'Realize uma busca antes.'
 
         tk.Tk.__init__(self, *args, **kwargs)
         self.wm_title("Olimpíada 2020 - Tóquio")
